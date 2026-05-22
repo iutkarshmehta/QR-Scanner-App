@@ -1,8 +1,6 @@
-# QR Scanner — Product Verification App
+## QR Scanner — Product Verification App
 
 An iOS app that scans QR codes and barcodes to instantly verify product authenticity using the [Open Food Facts](https://world.openfoodfacts.org) API. Scan results are stored locally for offline reference.
-
-> iOS take-home assignment for Acviss Technologies.
 
 ---
 
@@ -60,44 +58,44 @@ CameraPreviewView (AVFoundation)
 ```
 QR-Scanner-App/
 ├── Models/
-│   ├── ScanRecord.swift              SwiftData @Model + VerificationStatus enum
-│   └── ProductDetails.swift          API response DTOs + domain presentation model
+│   ├── ScanRecord.swift              
+│   └── ProductDetails.swift         
 │
 ├── Services/
-│   ├── CameraSession.swift           AVFoundation session on dedicated serial queue
+│   ├── CameraSession.swift           
 │   ├── Networking/
-│   │   ├── HTTPMethod.swift          GET / POST / PUT / PATCH / DELETE
-│   │   ├── APIEndpoint.swift         Protocol — scheme/host/path/method/urlRequest()
-│   │   ├── APIClient.swift           Protocol — send<T: Decodable>(_:) async throws
-│   │   ├── APIError.swift            Typed network errors
-│   │   └── URLSessionAPIClient.swift Concrete URLSession implementation
+│   │   ├── HTTPMethod.swift          
+│   │   ├── APIEndpoint.swift         
+│   │   ├── APIClient.swift           
+│   │   ├── APIError.swift            
+│   │   └── URLSessionAPIClient.swift 
 │   └── OpenFoodFacts/
-│       ├── OpenFoodFactsEndpoint.swift  .product(barcode:) endpoint definition
-│       └── ProductRepository.swift      Protocol + OpenFoodFacts implementation
+│       ├── OpenFoodFactsEndpoint.swift  
+│       └── ProductRepository.swift      
 │
 ├── ViewModels/
-│   ├── ScannerViewModel.swift        Camera + network + persistence orchestration
-│   ├── HistoryViewModel.swift        Search / filter / delete logic
-│   ├── ScanRecordViewModel.swift     View-ready wrapper over ScanRecord
-│   └── ProductDetailViewModel.swift  View-ready wrapper over ProductDetails
+│   ├── ScannerViewModel.swift        
+│   ├── HistoryViewModel.swift        
+│   ├── ScanRecordViewModel.swift     
+│   └── ProductDetailViewModel.swift  
 │
 └── Views/
     ├── Shared/
-    │   └── Theme.swift               AppTheme colours + .appCard() modifier
+    │   └── Theme.swift               
     ├── Tabbar/
-    │   └── TabbarView.swift          Root TabView (Home + History)
+    │   └── TabbarView.swift          
     ├── Home/
-    │   └── HomeView.swift            Landing screen with scan CTA
+    │   └── HomeView.swift            
     ├── Scanner/
-    │   ├── ScannerView.swift         Full-screen camera view, no tab bar
-    │   ├── ScanOverlayView.swift     Canvas-based cutout + animated reticle
-    │   └── CameraPreviewView.swift   UIViewRepresentable for AVCaptureVideoPreviewLayer
+    │   ├── ScannerView.swift         
+    │   ├── ScanOverlayView.swift     
+    │   └── CameraPreviewView.swift   
     ├── History/
-    │   ├── HistoryView.swift         Searchable, filterable scan list
-    │   ├── HistoryRowView.swift      Single row cell
-    │   └── HistoryDetailView.swift   Expanded record detail
+    │   ├── HistoryView.swift         
+    │   ├── HistoryRowView.swift      
+    │   └── HistoryDetailView.swift   
     └── ProductDetail/
-        └── ProductDetailView.swift   Verification result sheet
+        └── ProductDetailView.swift
 ```
 
 ---
@@ -132,28 +130,6 @@ APIClient            send<T: Decodable>(_ endpoint:) async throws -> T
 ProductRepository    fetchProduct(barcode:) async throws -> ProductDetails
   └── OpenFoodFactsRepository  maps DTO → domain model
 ```
-
-**Injecting a mock for tests:**
-
-```swift
-struct MockRepository: ProductRepository {
-    func fetchProduct(barcode: String) async throws -> ProductDetails { ... }
-}
-
-let vm = ScannerViewModel(repository: MockRepository())
-```
-
----
-
-## Concurrency Model
-
-| Component | Isolation | Reason |
-|---|---|---|
-| `ScannerViewModel` | `@MainActor` | Owns all UI-facing state |
-| `CameraSession` | `@unchecked Sendable` + serial `DispatchQueue` | AVFoundation must not run on main thread |
-| `URLSessionAPIClient.send` | `nonisolated` | I/O + JSON decode on cooperative thread pool |
-| `ProductRepository.fetchProduct` | `nonisolated` | Inherits from client; never touches UI |
-| Callbacks into ViewModel | `Task { @MainActor [weak self] in }` | Hop back to main actor; weak to avoid extending lifetime |
 
 ---
 

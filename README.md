@@ -119,7 +119,7 @@ QR-Scanner-App/
 | Concurrency | Swift structured concurrency — `@MainActor`, `nonisolated` |
 | API | Open Food Facts REST — free, no key required |
 | Minimum Target | iOS 17 |
-| Swift | 6.2 (`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`) |
+| Swift | 6.2  |
 | Dependencies | None — Apple frameworks only |
 
 ---
